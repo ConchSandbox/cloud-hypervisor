@@ -535,7 +535,7 @@ pub fn start_vmm_thread(
     };
 
     let http_api_handle = if let Some(http_path) = http_path {
-        Some(api::start_http_path_thread(
+        let handle = api::start_http_path_thread(
             http_path,
             api_event_clone,
             api_sender,
@@ -543,9 +543,11 @@ pub fn start_vmm_thread(
             exit_event,
             hypervisor_type,
             landlock_enable,
-        )?)
+        )?;
+        event!("vmm", "api-ready");
+        Some(handle)
     } else if let Some(http_fd) = http_fd {
-        Some(api::start_http_fd_thread(
+        let handle = api::start_http_fd_thread(
             http_fd,
             api_event_clone,
             api_sender,
@@ -553,7 +555,9 @@ pub fn start_vmm_thread(
             exit_event,
             hypervisor_type,
             landlock_enable,
-        )?)
+        )?;
+        event!("vmm", "api-ready");
+        Some(handle)
     } else {
         None
     };
